@@ -1,11 +1,31 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 
 export default function ScrollMessage() {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
+  const [quote, setQuote] = useState("");
+
+  useEffect(() => {
+    if (isOpen) {
+      const fetchQuotes = async () => {
+        try {
+          const res = await fetch("/api/quotes");
+          const data = await res.json();
+
+          if (Array.isArray(data) && data[0]?.q){
+            setQuote(`${data[0].q} - ${data[0].a}`);
+          } else {
+            setQuote("Unable to fetch quote.")
+          }
+        } catch (error) {
+          setQuote("Failed to fetch Quote.")
+        }
+      }
+      fetchQuotes();
+  }}, [isOpen]);
 
   return (
     <div className="relative w-full max-w-lg mx-auto py-10">
@@ -59,8 +79,8 @@ export default function ScrollMessage() {
                   transition={{ delay: 0.4 }}
                   className="absolute inset-0 flex items-center justify-center px-8"
                 >
-                  <p className="text-[#5d4037] text-center text-sm max-w-[80%]">
-                    Your daily inspiration message appears here when you tap! 
+                  <p className="text-[#5d4037] text-center text-sm max-w-[80%] p-5">
+                    {quote}
                   </p>
                 </motion.div>
               </motion.div>
